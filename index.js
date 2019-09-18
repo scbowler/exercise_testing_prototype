@@ -36,6 +36,8 @@ app.get('/api/exercises/:id', async (req, res) => {
 app.post('/api/exercises/test/:qid', async (req, res) => {
     const { body: { solution }, params: { qid } } = req;
 
+    console.log('QID:', qid);
+
     const [[question = null]] = await db.execute('SELECT answer, test FROM exerciseQuestions WHERE pid=?', [qid]);
 
     const result = await verify({solution, testSuite: question.test});

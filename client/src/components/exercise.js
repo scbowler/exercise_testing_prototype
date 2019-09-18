@@ -11,7 +11,7 @@ class Exercise extends Component {
     }
 
     renderQuestions = () => {
-        const { exercise } = this.props;
+        const { exercise, results } = this.props;
 
         if(!exercise){
             return <p><strong>Questions loading...</strong></p>;
@@ -23,17 +23,19 @@ class Exercise extends Component {
             return <p><strong>No questions available for this exercise</strong></p>
         }
 
-        return questions.map((q, i) => <Question key={q.pid} number={i + 1} {...q} />);
+        return questions.map((q, i) => <Question key={q.pid} number={i + 1} result={results[q.pid] || null} {...q} />);
     }
 
     render(){
         return (
             <div>
                 <h1 className="text-center mt-5">{this.props.exercise?.title || 'Exercise'}</h1>
-                <this.renderQuestions/>
+                <ol>
+                    <this.renderQuestions />
+                </ol>
             </div>
         );
     }
 }
 
-export default connect(({exercise: {current}}) => ({ exercise: current}), { getExercise })(Exercise);
+export default connect(({exercise: {current, results}}) => ({ exercise: current, results}), { getExercise })(Exercise);

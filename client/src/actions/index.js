@@ -27,12 +27,16 @@ export const getExercise = id => async dispatch => {
     }
 }
 
-export const checkAnswer = (qid, solution) => async dispatch => {
+export const checkAnswer = (questionId, solution) => async dispatch => {
     try {
-        const { data } = await axios.post(`/api/exercises/test/${qid}`, { solution });
+        const { data: {qid, ...result} } = await axios.post(`/api/exercises/test/${questionId}`, { solution });
 
-        console.log('Check Answer Resp:', data);
-
+        dispatch({
+            result: {
+                [qid]: result
+            },
+            type: types.CHECK_ANSWER
+        });
     } catch(err) {
         console.log('Error:', err);
     }
