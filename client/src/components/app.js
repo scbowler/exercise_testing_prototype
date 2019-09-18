@@ -1,5 +1,6 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
+import Exercise from './exercise';
 import Home from './home';
 
 const App = () => (
@@ -7,6 +8,7 @@ const App = () => (
         <div className="container">
 
             <Route path="/" exact component={Home} />
+            <Route path="/exercise/:id" component={Exercise} />
         </div>
     </div>
 );

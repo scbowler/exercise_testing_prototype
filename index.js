@@ -1,5 +1,6 @@
 const express = require('express');
 const { resolve } = require('path');
+const db = require('./db');
 const PORT = process.env.PORT || 9000;
 
 const app = express();
@@ -7,15 +8,27 @@ const app = express();
 app.use(express.json());
 app.use(express.static(resolve(__dirname, 'client', 'dist')));
 
-app.get('/api/exercises', (req, res) => {
+app.get('/api/exercises', async (req, res) => {
+
+    const [exercises] = await db.query('SELECT pid, title FROM exercises');
+
     res.send({
-        message: 'Get list of exercises'
+        exercises
     });
 });
 
-app.get('/api/exercises/:id', (req, res) => {
+app.get('/api/exercises/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const [results] = await db.execute('SELECT e.title, q.question, q.pid FROM exercises AS e JOIN exerciseQuestions AS q ON e.id=q.exerciseId WHERE e.pid=?', [id]);
+
+    const [{ title }] = results;
+
+    const questions = results.map(({title, ...q}) => ({...q}));
+
     res.send({
-        message: 'Get list of questions'
+        title,
+        questions
     });
 });
 
