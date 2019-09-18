@@ -5,7 +5,7 @@ const TIMEOUT_EXCEEDED = 'Timeout Exceeded';
 const CHALLENGE_FAILED = 'Challenge Failed!';
 const runner = 'runner.js';
 
-async function verify({ solution, testSuite }) {
+module.exports = async function verify({ solution, testSuite }) {
     try {
         const execArgs = [runner, solution + '\n\n' + testSuite]
         const { stdout } = await execFile('node', execArgs, { timeout: 3000 })
@@ -22,19 +22,19 @@ async function verify({ solution, testSuite }) {
     }
 }
 
-const test = {
-    solution: 'var names = "Tim"',
-    testSuite: `describe('The "name" variable', function(){
-        it('should be set to a string', function(){
-            expect(name).to.be.a('string');
-        });
-    });`
-}
+// const test = {
+//     solution: 'var names = "Tim"',
+//     testSuite: `describe('The "name" variable', function(){
+//         it('should be set to a string', function(){
+//             expect(name).to.be.a('string');
+//         });
+//     });`
+// }
 
-async function run(){
-    const result = await verify(test);
+// async function run(){
+//     const result = await verify(test);
 
-    console.log('RESULT:', result.report.failures);
-}
+//     console.log('RESULT:', result.report.failures);
+// }
 
-run();
+// run();

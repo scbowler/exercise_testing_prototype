@@ -1,6 +1,7 @@
 const express = require('express');
 const { resolve } = require('path');
 const db = require('./db');
+const verify = require('./verify');
 const PORT = process.env.PORT || 9000;
 
 const app = express();
@@ -32,10 +33,27 @@ app.get('/api/exercises/:id', async (req, res) => {
     });
 });
 
-app.post('/api/exercises/test/:qid', (req, res) => {
+app.post('/api/exercises/test/:qid', async (req, res) => {
+    const { body: { solution }, params: { qid } } = req;
+
+    const [[question = null]] = await db.execute('SELECT answer, test FROM exerciseQuestions WHERE pid=?', [qid]);
+
+    const result = await verify({solution, testSuite: question.test});
+
+    const passed = !(result.error);
+
+    let instructorSolution = 'Must pass to view';
+
+    if(passed){
+        instructorSolution = question.answer;
+    }
+
     res.send({
-        questionId: qid,
-        message: 'Your answer is wrong!'
+        passed,
+        instructorSolution,
+        studentSolution: solution,
+        qid,
+        result,
     });
 });
 
