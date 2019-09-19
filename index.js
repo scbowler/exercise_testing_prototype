@@ -59,6 +59,21 @@ app.post('/api/exercises/test/:qid', async (req, res) => {
     });
 });
 
+app.get('/api/admin/exercises/:id', async (req, res) => {
+    const { id } = req.params;
+
+    const [results] = await db.execute('SELECT e.title, q.question, q.pid, q.answer, q.test, q.created FROM exercises AS e JOIN exerciseQuestions AS q ON e.id=q.exerciseId WHERE e.pid=?', [id]);
+
+    const [{ title }] = results;
+
+    const questions = results.map(({ title, ...q }) => ({ ...q }));
+
+    res.send({
+        title,
+        questions
+    });
+});
+
 app.get('*', (req, res) => {
     res.sendFile(resolve(__dirname, 'client', 'dist'));
 });

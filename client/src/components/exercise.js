@@ -29,7 +29,7 @@ class Exercise extends Component {
     render(){
         return (
             <div>
-                <h1 className="text-center mt-5">{this.props.exercise?.title || 'Exercise'}</h1>
+                <h1 className="text-center">{this.props.exercise?.title || 'Exercise'}</h1>
                 <ol>
                     <this.renderQuestions />
                 </ol>

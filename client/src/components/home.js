@@ -23,7 +23,7 @@ class Home extends Component {
             <ol>
                 {list.map(({ pid, title }) => (
                     <li key={pid}>
-                        <Link to={`/exercise/${pid}`}>{title}</Link>
+                        <Link to={`/exercise/${pid}`}>{title}</Link> <Link to={`/exercise/edit/${pid}`}> <i className="material-icons">edit</i></Link>
                     </li>
                 ))}
             </ol>
@@ -33,7 +33,7 @@ class Home extends Component {
     render() {
 
         return (
-            <div className="mt-5">
+            <div>
                 <h1 className="text-center">Exercise Tester</h1>
                 <div className="mt-4">
                     <h2>Exercises:</h2>
