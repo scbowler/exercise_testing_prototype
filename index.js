@@ -33,16 +33,69 @@ app.get('/api/exercises/:id', async (req, res) => {
     });
 });
 
-app.post('/api/exercises/test/:qid', async (req, res) => {
-    const { body: { solution }, params: { qid } } = req;
+app.post('/api/admin/exercises/:id/questions/test', async (req, res) => {
+    try {
+        const { answer, question, test } = req.body;
 
-    console.log('QID:', qid);
+        if (!answer) throw new Error('Missing answer');
+        if (!question) throw new Error('Missing question');
+        if (!test) throw new Error('Missing test');
+
+        const { result, passed } = await runTest(answer, test);
+
+        res.send({
+            result, passed
+        });
+
+    } catch (err) {
+        res.status(418).send({
+            message: 'Error testing new question for exercise',
+            error: err.message
+        });
+    }
+});
+
+app.post('/api/admin/exercises/:id/questions', async (req, res) => {
+    try {
+        const { answer, question, test } = req.body;
+
+        if(!answer) throw new Error('Missing answer');
+        if(!question) throw new Error('Missing question');
+        if(!test) throw new Error('Missing test');
+
+        const {result, passed} = await runTest(answer, test);
+
+        if(!passed){
+            throw new Error('Test Failed!');
+        }
+
+        const [dbResult] = await db.execute('INSERT INTO exerciseQuestions (pid, question, answer, test, exerciseId) VALUES (UUID(), ?, ?, ?, 1)', [question, answer, test]);
+
+        if(!dbResult.affectedRows){
+            throw new Error('Failed to save test to database');
+        }
+
+        const [[q]] = await db.query('SELECT answer, created, pid, question, test FROM exerciseQuestions WHERE id=?', [dbResult.insertId]);
+
+        res.send({
+            message: 'Question successfully added',
+            question: q
+        });
+
+    } catch (err) {
+        res.status(418).send({
+            message: 'Error adding new question to exercise',
+            error: err.message
+        });
+    }
+});
+
+app.post('/api/exercises/questions/test/:qid', async (req, res) => {
+    const { body: { solution }, params: { qid } } = req;
 
     const [[question = null]] = await db.execute('SELECT answer, test FROM exerciseQuestions WHERE pid=?', [qid]);
 
-    const result = await verify({solution, testSuite: question.test});
-
-    const passed = !(result.error);
+    const {result, passed} = await runTest(solution, question.test);
 
     let instructorSolution = 'Must pass to view';
 
@@ -56,6 +109,14 @@ app.post('/api/exercises/test/:qid', async (req, res) => {
         studentSolution: solution,
         qid,
         result,
+    });
+});
+
+app.post('/api/admin/exercises', async (req, res) => {
+    const { body } = req;
+
+    res.send({
+        mirror: body
     });
 });
 
@@ -81,3 +142,13 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
     console.log('Server running @ localhost:%d', PORT);
 });
+
+async function runTest(solution, testSuite){
+    const test = {};
+
+    test.result = await verify({ solution, testSuite });
+
+    test.passed = !(test.result.error);
+
+    return test;
+}

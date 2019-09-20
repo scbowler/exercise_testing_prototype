@@ -37,3 +37,33 @@ describe('The "numbers" variable', function(){
         expect(numbers).to.include.members([1, 2, 3, 4, 5]);
     });
 });
+
+// Create a function that takes a single argument, doubles it, then returns the result
+
+function double(x){
+    return x * 2;
+}
+
+describe('The "double" function', function(){
+    it('should be a function', function(){
+        expect(double).to.be.a('function');
+    });
+    it('should double a passed in argument and return the result', function(){
+        expect(double(8)).to.equal(8 * 2);
+    });
+});
+
+// Create a function named "triple" that takes a single argument, triples it, then returns the result
+
+function triple(x) {
+    return x * 3;
+}
+
+describe('The "triple" function', function () {
+    it('should be a function', function () {
+        expect(double).to.be.a('function');
+    });
+    it('should triple a passed in argument and return the result', function () {
+        expect(double(5)).to.equal(5 * 3);
+    });
+});

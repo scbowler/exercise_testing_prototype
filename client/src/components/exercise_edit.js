@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { adminGetExercise } from '../actions';
+import { adminAddQuestion, adminCheckTest, adminGetExercise } from '../actions';
 import AdminQuestion from './admin_question';
 
 class ExerciseEdit extends Component {
@@ -62,12 +62,23 @@ class ExerciseEdit extends Component {
 
     submitQuestion = async e => {
         e.preventDefault();
+        const { adminAddQuestion, match: { params } } = this.props;
 
         try {
-            console.log('Values:', this.state);
+            await adminAddQuestion(params.id, { ...this.state });
 
             this.clearForm();
         } catch(err) {
+            console.log('Error in component when adding new question:', err);
+        }
+    }
+
+    testQuestion = async () => {
+        const { adminCheckTest, match: { params } } = this.props;
+
+        try {
+            await adminCheckTest(params.id, { ...this.state });
+        } catch (err) {
             console.log('Error in component when adding new question:', err);
         }
     }
@@ -107,7 +118,8 @@ class ExerciseEdit extends Component {
                             </div>
                             <div className="text-right">
                                 <button className="btn btn-outline-danger mr-3" onClick={this.clearForm} type="button">Clear Form</button>
-                                <button className="btn btn-outline-primary">Add Question</button>
+                                <button className="btn btn-outline-info mr-3" onClick={this.testQuestion} type="button">Test Question</button>
+                                <button className="btn btn-outline-primary">Test and Add Question</button>
                             </div>
                         </form>
                     </div>
@@ -117,4 +129,4 @@ class ExerciseEdit extends Component {
     }
 }
 
-export default connect(({adminExercise}) => ({...adminExercise}), { adminGetExercise })(ExerciseEdit);
+export default connect(({adminExercise}) => ({...adminExercise}), { adminAddQuestion, adminCheckTest, adminGetExercise })(ExerciseEdit);
