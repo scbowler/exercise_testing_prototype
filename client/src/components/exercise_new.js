@@ -1,15 +1,23 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { adminCreateExercise } from '../actions';
 
 class ExerciseNew extends Component {
     state = {
         title: ''
     }
 
-    handleSubmit = e => {
+    handleSubmit = async e => {
         e.preventDefault();
 
-        console.log('Title:', this.state.title);
+        try  {
+            const id = await this.props.adminCreateExercise(this.state.title);
+
+            this.props.history.push(`/exercise/edit/${id}`);
+        } catch(err) {
+            console.log('Error in component creating new exercise');
+        }
     }
 
     render(){
@@ -33,4 +41,4 @@ class ExerciseNew extends Component {
     }
 }
 
-export default ExerciseNew;
+export default connect(null, { adminCreateExercise })(ExerciseNew);

@@ -19,7 +19,6 @@ export const adminCheckTest = (id, q) => async dispatch => {
         const { data } = await axios.post(`/api/admin/exercises/${id}/questions/test`, q);
 
         console.log('Add Response:', data);
-
     } catch (err) {
         console.log('Error checking test:', err);
     }
@@ -27,7 +26,10 @@ export const adminCheckTest = (id, q) => async dispatch => {
 
 export const adminCreateExercise = title => async dispatch => {
     try {
+        const { data, data: { id } } = await axios.post('/api/admin/exercises', {title});
 
+        console.log('Creat Exercise Resp:', data);
+        return id;
     } catch (err) {
         console.log('Error creating new exercise:', err);
     }

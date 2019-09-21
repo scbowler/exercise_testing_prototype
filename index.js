@@ -21,16 +21,11 @@ app.get('/api/exercises', async (req, res) => {
 app.get('/api/exercises/:id', async (req, res) => {
     const { id } = req.params;
 
-    const [results] = await db.execute('SELECT e.title, q.question, q.pid FROM exercises AS e JOIN exerciseQuestions AS q ON e.id=q.exerciseId WHERE e.pid=?', [id]);
+    const [[{title, exId}]] = await db.execute('SELECT title, id AS exId FROM exercises WHERE pid=?', [id]);
 
-    const [{ title }] = results;
+    const [questions] = await db.execute('SELECT question, pid FROM exerciseQuestions WHERE exerciseId=?', [exId]);
 
-    const questions = results.map(({title, ...q}) => ({...q}));
-
-    res.send({
-        title,
-        questions
-    });
+    res.send({ title, questions });
 });
 
 app.post('/api/admin/exercises/:id/questions/test', async (req, res) => {
@@ -58,6 +53,7 @@ app.post('/api/admin/exercises/:id/questions/test', async (req, res) => {
 app.post('/api/admin/exercises/:id/questions', async (req, res) => {
     try {
         const { answer, question, test } = req.body;
+        const { id } = req.params;
 
         if(!answer) throw new Error('Missing answer');
         if(!question) throw new Error('Missing question');
@@ -69,7 +65,9 @@ app.post('/api/admin/exercises/:id/questions', async (req, res) => {
             throw new Error('Test Failed!');
         }
 
-        const [dbResult] = await db.execute('INSERT INTO exerciseQuestions (pid, question, answer, test, exerciseId) VALUES (UUID(), ?, ?, ?, 1)', [question, answer, test]);
+        const [[{exId}]] = await db.execute('SELECT id AS exId FROM exercises WHERE pid=?', [id]);
+
+        const [dbResult] = await db.execute('INSERT INTO exerciseQuestions (pid, question, answer, test, exerciseId) VALUES (UUID(), ?, ?, ?, ?)', [question, answer, test, exId]);
 
         if(!dbResult.affectedRows){
             throw new Error('Failed to save test to database');
@@ -113,26 +111,40 @@ app.post('/api/exercises/questions/test/:qid', async (req, res) => {
 });
 
 app.post('/api/admin/exercises', async (req, res) => {
-    const { body } = req;
+    try {
+        const { title } = req.body;
 
-    res.send({
-        mirror: body
-    });
+        if(!title) throw new Error('Missing title');
+
+        const [result] = await db.execute('INSERT INTO exercises (pid, title) VALUES (UUID(), ?)', [title]);
+
+        if(!result.affectedRows) throw new Error('Error creating new exercise');
+
+        const [[exercise]] = await db.query('SELECT pid FROM exercises WHERE id=?', [result.insertId]);
+
+        res.send({
+            id: exercise.pid
+        });
+    } catch(err) {
+        res.status(418).send({
+            message: 'Error creating new exercise',
+            error: err.message
+        });
+    }
 });
 
 app.get('/api/admin/exercises/:id', async (req, res) => {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-    const [results] = await db.execute('SELECT e.title, q.question, q.pid, q.answer, q.test, q.created FROM exercises AS e JOIN exerciseQuestions AS q ON e.id=q.exerciseId WHERE e.pid=?', [id]);
+        const [[{ exId, title }]] = await db.execute('SELECT title, id AS exId FROM exercises WHERE pid=?', [id]);
 
-    const [{ title }] = results;
+        const [questions] = await db.query('SELECT question, pid, answer, test, created FROM exerciseQuestions WHERE exerciseId=?', [exId]);
 
-    const questions = results.map(({ title, ...q }) => ({ ...q }));
-
-    res.send({
-        title,
-        questions
-    });
+        res.send({ title, questions });
+    } catch(err) {
+        res.status(404).send('No exercise found');
+    }
 });
 
 app.get('*', (req, res) => {
