@@ -21,28 +21,79 @@ app.get('/api/exercises', async (req, res) => {
 app.get('/api/exercises/:id', async (req, res) => {
     const { id } = req.params;
 
-    const [results] = await db.execute('SELECT e.title, q.question, q.pid FROM exercises AS e JOIN exerciseQuestions AS q ON e.id=q.exerciseId WHERE e.pid=?', [id]);
+    const [[{title, exId}]] = await db.execute('SELECT title, id AS exId FROM exercises WHERE pid=?', [id]);
 
-    const [{ title }] = results;
+    const [questions] = await db.execute('SELECT question, pid FROM exerciseQuestions WHERE exerciseId=?', [exId]);
 
-    const questions = results.map(({title, ...q}) => ({...q}));
-
-    res.send({
-        title,
-        questions
-    });
+    res.send({ title, questions });
 });
 
-app.post('/api/exercises/test/:qid', async (req, res) => {
-    const { body: { solution }, params: { qid } } = req;
+app.post('/api/admin/exercises/:id/questions/test', async (req, res) => {
+    try {
+        const { answer, question, test } = req.body;
 
-    console.log('QID:', qid);
+        if (!answer) throw new Error('Missing answer');
+        if (!question) throw new Error('Missing question');
+        if (!test) throw new Error('Missing test');
+
+        const { result, passed } = await runTest(answer, test);
+
+        res.send({
+            result, passed
+        });
+
+    } catch (err) {
+        res.status(418).send({
+            message: 'Error testing new question for exercise',
+            error: err.message
+        });
+    }
+});
+
+app.post('/api/admin/exercises/:id/questions', async (req, res) => {
+    try {
+        const { answer, question, test } = req.body;
+        const { id } = req.params;
+
+        if(!answer) throw new Error('Missing answer');
+        if(!question) throw new Error('Missing question');
+        if(!test) throw new Error('Missing test');
+
+        const {result, passed} = await runTest(answer, test);
+
+        if(!passed){
+            throw new Error('Test Failed!');
+        }
+
+        const [[{exId}]] = await db.execute('SELECT id AS exId FROM exercises WHERE pid=?', [id]);
+
+        const [dbResult] = await db.execute('INSERT INTO exerciseQuestions (pid, question, answer, test, exerciseId) VALUES (UUID(), ?, ?, ?, ?)', [question, answer, test, exId]);
+
+        if(!dbResult.affectedRows){
+            throw new Error('Failed to save test to database');
+        }
+
+        const [[q]] = await db.query('SELECT answer, created, pid, question, test FROM exerciseQuestions WHERE id=?', [dbResult.insertId]);
+
+        res.send({
+            message: 'Question successfully added',
+            question: q
+        });
+
+    } catch (err) {
+        res.status(418).send({
+            message: 'Error adding new question to exercise',
+            error: err.message
+        });
+    }
+});
+
+app.post('/api/exercises/questions/test/:qid', async (req, res) => {
+    const { body: { solution }, params: { qid } } = req;
 
     const [[question = null]] = await db.execute('SELECT answer, test FROM exerciseQuestions WHERE pid=?', [qid]);
 
-    const result = await verify({solution, testSuite: question.test});
-
-    const passed = !(result.error);
+    const {result, passed} = await runTest(solution, question.test);
 
     let instructorSolution = 'Must pass to view';
 
@@ -59,19 +110,41 @@ app.post('/api/exercises/test/:qid', async (req, res) => {
     });
 });
 
+app.post('/api/admin/exercises', async (req, res) => {
+    try {
+        const { title } = req.body;
+
+        if(!title) throw new Error('Missing title');
+
+        const [result] = await db.execute('INSERT INTO exercises (pid, title) VALUES (UUID(), ?)', [title]);
+
+        if(!result.affectedRows) throw new Error('Error creating new exercise');
+
+        const [[exercise]] = await db.query('SELECT pid FROM exercises WHERE id=?', [result.insertId]);
+
+        res.send({
+            id: exercise.pid
+        });
+    } catch(err) {
+        res.status(418).send({
+            message: 'Error creating new exercise',
+            error: err.message
+        });
+    }
+});
+
 app.get('/api/admin/exercises/:id', async (req, res) => {
-    const { id } = req.params;
+    try {
+        const { id } = req.params;
 
-    const [results] = await db.execute('SELECT e.title, q.question, q.pid, q.answer, q.test, q.created FROM exercises AS e JOIN exerciseQuestions AS q ON e.id=q.exerciseId WHERE e.pid=?', [id]);
+        const [[{ exId, title }]] = await db.execute('SELECT title, id AS exId FROM exercises WHERE pid=?', [id]);
 
-    const [{ title }] = results;
+        const [questions] = await db.query('SELECT question, pid, answer, test, created FROM exerciseQuestions WHERE exerciseId=?', [exId]);
 
-    const questions = results.map(({ title, ...q }) => ({ ...q }));
-
-    res.send({
-        title,
-        questions
-    });
+        res.send({ title, questions });
+    } catch(err) {
+        res.status(404).send('No exercise found');
+    }
 });
 
 app.get('*', (req, res) => {
@@ -81,3 +154,13 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
     console.log('Server running @ localhost:%d', PORT);
 });
+
+async function runTest(solution, testSuite){
+    const test = {};
+
+    test.result = await verify({ solution, testSuite });
+
+    test.passed = !(test.result.error);
+
+    return test;
+}

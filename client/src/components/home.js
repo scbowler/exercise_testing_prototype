@@ -38,6 +38,7 @@ class Home extends Component {
                 <div className="mt-4">
                     <h2>Exercises:</h2>
                     <this.renderList/>
+                    <p><Link to="/exercise/new">Create New Exercise <i className="material-icons">add</i></Link></p>
                 </div>
             </div>
         );
