@@ -61,9 +61,27 @@ function triple(x) {
 
 describe('The "triple" function', function () {
     it('should be a function', function () {
-        expect(double).to.be.a('function');
+        expect(triple).to.be.a('function');
     });
     it('should triple a passed in argument and return the result', function () {
-        expect(double(5)).to.equal(5 * 3);
+        expect(triple(5)).to.equal(5 * 3);
+    });
+});
+
+var numbers2 = [];
+for (var n = 1; n <= 1000; n++) {
+    numbers2.push(n);
+}
+
+describe('The "numbers" array', function() {
+    it('should be an array', function() {
+        expect(numbers2).to.be.a('array');
+    });
+    it('should contain a range of numbers from 1 to 1000 inclusive', function(){
+        const testNumbers = [];
+        for(let tn = 1; tn <= 1000; tn++){
+            testNumbers.push(tn);
+        }
+        expect(numbers2).to.contain.members(testNumbers);
     });
 });
