@@ -4,6 +4,9 @@ import brace from 'brace';
 import Ace from 'react-ace';
 import { checkAnswer } from '../actions';
 import 'brace/theme/tomorrow_night_bright';
+import 'brace/snippets/javascript';
+import 'brace/ext/language_tools';
+import 'brace/mode/javascript';
 
 class Question extends Component {
     state = {
@@ -100,9 +103,6 @@ class Question extends Component {
 
     render(){
         const { pid, question, result } = this.props;
-
-        console.log('Props:', this.props);
-
         const complete = result ? result.passed : false;
 
         return (
@@ -124,6 +124,9 @@ class Question extends Component {
                                 enableBasicAutocompletion={true}
                                 enableLiveAutocompletion={true}
                                 readOnly={complete}
+                                editorProps={{
+                                    $blockScrolling: Infinity
+                                }}
                             />
                             <div className="mt-2">
                                 <button onClick={this.submitAnswer} className="btn btn-outline-success">Check Answer</button>

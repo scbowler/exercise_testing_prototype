@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import brace from 'brace';
+import Ace from 'react-ace';
+import 'brace/theme/tomorrow_night_bright';
 import { adminAddQuestion, adminCheckTest, adminGetExercise } from '../actions';
 import AdminQuestion from './admin_question';
 
