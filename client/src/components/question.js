@@ -1,10 +1,14 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import brace from 'brace';
+import Ace from 'react-ace';
 import { checkAnswer } from '../actions';
+import 'brace/theme/tomorrow_night_bright';
 
 class Question extends Component {
     state = {
-        answer: ''
+        answer: '',
+        theme: 'tomorrow_night_bright'
     }
 
     submitAnswer = () => {
@@ -12,6 +16,14 @@ class Question extends Component {
         const { answer } = this.state;
 
         checkAnswer(pid, answer);
+    }
+
+    setTheme = theme => this.setState({theme})
+
+    themeBtns = () => {
+        return themes.map(t => {
+            return <button key={t} onClick={() => {this.setTheme(t)}}>{t}</button>;
+        });
     }
 
     renderFailures = ({fails}) => {
@@ -80,8 +92,18 @@ class Question extends Component {
         );
     }
 
+    editorChange = value => {
+        this.setState({
+            answer: value
+        });
+    }
+
     render(){
-        const { question } = this.props;
+        const { pid, question, result } = this.props;
+
+        console.log('Props:', this.props);
+
+        const complete = result ? result.passed : false;
 
         return (
             <li className="mt-4">
@@ -89,7 +111,20 @@ class Question extends Component {
                     <div className="col-6">
                         <p>{question}</p>
                         <div className="ml-2">
-                            <textarea cols="50" rows="4" value={this.state.answer} onChange={({ target: { value } }) => this.setState({ answer: value })}></textarea>
+                            {/* <textarea cols="50" rows="4" value={this.state.answer} onChange={({ target: { value } }) => this.setState({ answer: value })}></textarea> */}
+                            <Ace
+                                mode="javascript"
+                                theme={this.state.theme}
+                                onChange={this.editorChange}
+                                name={pid}
+                                editorProps={{}}
+                                height="162px"
+                                width="100%"
+                                value={this.state.answer}
+                                enableBasicAutocompletion={true}
+                                enableLiveAutocompletion={true}
+                                readOnly={complete}
+                            />
                             <div className="mt-2">
                                 <button onClick={this.submitAnswer} className="btn btn-outline-success">Check Answer</button>
                             </div>
