@@ -1,17 +1,11 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import brace from 'brace';
-import Ace from 'react-ace';
 import { checkAnswer } from '../actions';
-import 'brace/theme/tomorrow_night_bright';
-import 'brace/snippets/javascript';
-import 'brace/ext/language_tools';
-import 'brace/mode/javascript';
+import Editor from './editor';
 
 class Question extends Component {
     state = {
-        answer: '',
-        theme: 'tomorrow_night_bright'
+        answer: ''
     }
 
     submitAnswer = () => {
@@ -19,14 +13,6 @@ class Question extends Component {
         const { answer } = this.state;
 
         checkAnswer(pid, answer);
-    }
-
-    setTheme = theme => this.setState({theme})
-
-    themeBtns = () => {
-        return themes.map(t => {
-            return <button key={t} onClick={() => {this.setTheme(t)}}>{t}</button>;
-        });
     }
 
     renderFailures = ({fails}) => {
@@ -111,22 +97,12 @@ class Question extends Component {
                     <div className="col-6">
                         <p>{question}</p>
                         <div className="ml-2">
-                            {/* <textarea cols="50" rows="4" value={this.state.answer} onChange={({ target: { value } }) => this.setState({ answer: value })}></textarea> */}
-                            <Ace
-                                mode="javascript"
-                                theme={this.state.theme}
-                                onChange={this.editorChange}
-                                name={pid}
-                                editorProps={{}}
+                            <Editor 
                                 height="162px"
-                                width="100%"
+                                name={pid}
+                                onChange={this.editorChange}
                                 value={this.state.answer}
-                                enableBasicAutocompletion={true}
-                                enableLiveAutocompletion={true}
                                 readOnly={complete}
-                                editorProps={{
-                                    $blockScrolling: Infinity
-                                }}
                             />
                             <div className="mt-2">
                                 <button onClick={this.submitAnswer} className="btn btn-outline-success">Check Answer</button>

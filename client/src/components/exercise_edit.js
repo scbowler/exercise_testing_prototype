@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import brace from 'brace';
-import Ace from 'react-ace';
-import 'brace/theme/tomorrow_night_bright';
 import { adminAddQuestion, adminCheckTest, adminGetExercise } from '../actions';
 import AdminQuestion from './admin_question';
+import Editor from './editor';
 
 class ExerciseEdit extends Component {
     state = {
@@ -25,6 +23,12 @@ class ExerciseEdit extends Component {
         const { adminGetExercise, match: { params }} = this.props;
 
         adminGetExercise(params.id);
+    }
+
+    handleEditor(name, value){
+        this.setState({
+            [name]: value
+        });
     }
 
     handleInput = ({target: {name, value}}) => {
@@ -110,13 +114,23 @@ class ExerciseEdit extends Component {
                             <div>
                                 <label htmlFor="answer"><strong>Answer:</strong></label>
                                 <div>
-                                    <textarea style={this.textStyle} id="answer" name="answer" rows="10" value={answer} onChange={this.handleInput} ></textarea>
+                                    <Editor
+                                        height="162px"
+                                        name="answer-editor"
+                                        onChange={(v) => this.handleEditor('answer', v)}
+                                        value={this.state.answer}
+                                    />
                                 </div>
                             </div>
                             <div>
                                 <label htmlFor="test"><strong>Test:</strong></label>
                                 <div>
-                                    <textarea style={this.textStyle} id="test" name="test" rows="10" value={test} onChange={this.handleInput} ></textarea>
+                                    <Editor
+                                        height="324px"
+                                        name="test-editor"
+                                        onChange={(v) => this.handleEditor('test', v)}
+                                        value={this.state.test}
+                                    />
                                 </div>
                             </div>
                             <div className="text-right">

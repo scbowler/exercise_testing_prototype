@@ -123,7 +123,7 @@ class Editor extends Component {
             />
         }
 
-        return <h1>Loading Code Editor...</h1>
+        return <p><small>Loading Code Editor...</small></p>
     }
 }
 
