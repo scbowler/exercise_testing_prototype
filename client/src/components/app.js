@@ -16,7 +16,7 @@ const App = () => (
                 <Route path="/exercise/new" exact component={ExerciseNew} />
                 <Route path="/exercise/edit/:id" exact component={ExerciseEdit} />
                 <Route path="/exercise/:id" exact component={Exercise} />
-                <Route path="/editor" render={props => <Editor theme="dracula"/>} />
+                <Route path="/editor" render={props => <Editor/>} />
             </Switch>
         </div>
     </div>
