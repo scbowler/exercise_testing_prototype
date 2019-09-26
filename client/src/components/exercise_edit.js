@@ -133,7 +133,7 @@ class ExerciseEdit extends Component {
                                     />
                                 </div>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right mt-4">
                                 <button className="btn btn-outline-danger mr-3" onClick={this.clearForm} type="button">Clear Form</button>
                                 <button className="btn btn-outline-info mr-3" onClick={this.testQuestion} type="button">Test Question</button>
                                 <button className="btn btn-outline-primary">Test and Add Question</button>

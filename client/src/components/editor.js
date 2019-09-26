@@ -101,15 +101,17 @@ class Editor extends Component {
 
     render(){
         if(this.state.resourcesLoaded){
-            const { editorProps, fontSize, height, onChange, readOnly, value, width } = this.props;
+            const { cursorStart, editorProps, fontSize, height, highlightActiveLine, onChange, readOnly, value, width } = this.props;
             const { mode, name, theme } = this.state;
 
             return <Ace
+                cursorStart={cursorStart}
                 mode={mode}
                 theme={theme}
                 onChange={onChange}
                 name={name}
                 fontSize={fontSize}
+                highlightActiveLine={highlightActiveLine}
                 height={height}
                 width={width}
                 value={value}
@@ -128,9 +130,11 @@ class Editor extends Component {
 }
 
 Editor.propTypes = {
+    cursorStart: PropTypes.number,
     editorProps: PropTypes.object,
     ext: PropTypes.string,
     fontSize: PropTypes.number,
+    highlightActiveLine: PropTypes.bool,
     height: PropTypes.string,
     mode: PropTypes.string,
     name: PropTypes.string,
@@ -143,9 +147,11 @@ Editor.propTypes = {
 }
 
 Editor.defaultProps = {
+    cursorStart: 1,
     editorProps: {},
     ext: DEFAULT_EXT,
     fontSize: 14,
+    highlightActiveLine: true,
     height: DEFAULT_HEIGHT,
     mode: DEFAULT_MODE,
     name: null,

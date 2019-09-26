@@ -21,9 +21,9 @@ class Home extends Component {
 
         return (
             <ol>
-                {list.map(({ pid, title }) => (
+                {list.map(({ pid, title, questions }) => (
                     <li key={pid}>
-                        <Link to={`/exercise/${pid}`}>{title}</Link> <Link to={`/exercise/edit/${pid}`}> <i className="material-icons">edit</i></Link>
+                        <Link to={`/exercise/${pid}`}>{title} ({questions})</Link> <Link to={`/exercise/edit/${pid}`}> <i className="material-icons">edit</i></Link>
                     </li>
                 ))}
             </ol>
