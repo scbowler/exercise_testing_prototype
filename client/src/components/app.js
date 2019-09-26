@@ -4,7 +4,6 @@ import ExerciseEdit from './exercise_edit';
 import ExerciseNew from './exercise_new';
 import Exercise from './exercise';
 import Home from './home';
-import Editor from './editor';
 import '../assets/css/app.scss';
 
 const App = () => (
@@ -16,7 +15,6 @@ const App = () => (
                 <Route path="/exercise/new" exact component={ExerciseNew} />
                 <Route path="/exercise/edit/:id" exact component={ExerciseEdit} />
                 <Route path="/exercise/:id" exact component={Exercise} />
-                <Route path="/editor" render={props => <Editor/>} />
             </Switch>
         </div>
     </div>
