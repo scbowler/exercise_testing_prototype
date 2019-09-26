@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { checkAnswer } from '../actions';
+import Editor from './editor';
 
 class Question extends Component {
     state = {
@@ -80,8 +81,15 @@ class Question extends Component {
         );
     }
 
+    editorChange = value => {
+        this.setState({
+            answer: value
+        });
+    }
+
     render(){
-        const { question } = this.props;
+        const { pid, question, result } = this.props;
+        const complete = result ? result.passed : false;
 
         return (
             <li className="mt-4">
@@ -89,7 +97,13 @@ class Question extends Component {
                     <div className="col-6">
                         <p>{question}</p>
                         <div className="ml-2">
-                            <textarea cols="50" rows="4" value={this.state.answer} onChange={({ target: { value } }) => this.setState({ answer: value })}></textarea>
+                            <Editor 
+                                height="162px"
+                                name={pid}
+                                onChange={this.editorChange}
+                                value={this.state.answer}
+                                readOnly={complete}
+                            />
                             <div className="mt-2">
                                 <button onClick={this.submitAnswer} className="btn btn-outline-success">Check Answer</button>
                             </div>

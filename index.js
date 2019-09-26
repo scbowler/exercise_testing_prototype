@@ -11,7 +11,7 @@ app.use(express.static(resolve(__dirname, 'client', 'dist')));
 
 app.get('/api/exercises', async (req, res) => {
 
-    const [exercises] = await db.query('SELECT pid, title FROM exercises');
+    const [exercises] = await db.query('SELECT e.pid, e.title, COUNT(q.id) AS questions  FROM exercises AS e LEFT JOIN exerciseQuestions AS q ON q.exerciseId=e.id GROUP BY e.id');
 
     res.send({
         exercises
